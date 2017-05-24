@@ -1,19 +1,23 @@
 /*****************************************************************************
  *	Name:   David Zhu                                                        *
  *	Course: ICS4U                                                            *  
- *	Date: May 15th 2017  		                                                 * 
+ *	Date: May 15th 2017  		                                             * 
  *	                                                                         * 
- *	Purpose: Sort Data using various sort algorithms							         *
+ *	Purpose: Sort Data using various sort algorithms						 *
  *	                                                                         *
- *	Usage: https://think.cs.vt.edu/corgis/csv/hospitals/hospitals.html									 *
- *	       														     *    
+ *	Usage: https://think.cs.vt.edu/corgis/csv/hospitals/hospitals.html		 *
+ *	       														    		 *    
  *	                                                                         *
- *	Revision History:  added partition and quickSort with numbers
- 						adding user interface for sort method and category                                                   *  
+ *	Revision History:  added partition and quickSort with numbers			 *
+ *						adding user interface for sort method and category	 *
+ *						 added insertion and merge sort						 *  
  *	                                                                         *
- *	Known Issues: Kio							         *
+ *	Known Issues: Certain names in the file contain a comma in 1 header		 *
+ *					i.e (Houston, TX is considered 2 seperate objects,		 *
+ *					  but are actually 1)							         *
  *	                                                                         *  
  *****************************************************************************/
+ 
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -22,8 +26,11 @@
 #include <cstdlib>
 #include <algorithm>
 char toSort; 
+int moves = 0;
+int comparisons = 0;
 using namespace std;
  
+// data type used in vector 
 struct Hydropower {
 	
 	string county;
@@ -71,11 +78,29 @@ void readNext(ifstream &f, string &s) {
 	
 }
 
+// I decided to use name, county and latitude only to save time
 void printLine(Hydropower h) {
 	
-	cout << setw(30) << h.county << " | ";
-	cout << h.latitude << endl;
-
+	// Print by name
+	if (toSort == 'n' || toSort == 'N') {
+		cout << setw(32) << h.name << " | ";
+		cout << setw(30) << h.county << " | ";
+		cout << setw(10) <<  h.latitude << endl;
+	}
+	// Print by county
+	if (toSort == 'c' || toSort == 'C') {
+		cout << setw(30) << h.county << " | ";		
+		cout <<setw(32) << h.name << " | ";
+		cout << setw(10) <<  h.latitude << endl;
+	}
+	
+	// Print by latitude
+	if (toSort == 'l' || toSort == 'L') {
+		cout << setw(10) <<  h.latitude << " | ";		
+		cout <<setw(32) << h.name << " | ";
+		cout << setw(30) << h.county << endl;
+	}	
+	
 }
 
 // Quick sort function
@@ -84,24 +109,33 @@ void quickSort(vector<Hydropower> &h, int left, int right) {
       Hydropower temp;
       
       // Sorting by Latitude
-      if (toSort == 'l' || toSort == 'L'){
+      if (toSort == 'l' || toSort == 'L') {
      	float pivot = h[(left + right) / 2].latitude;
  
-	      // While lower counter is less than upper counter - i starts at bottom and goes up, j starts at top goes down
+	    // While lower counter is less than upper counter - i starts at bottom and goes up, j starts at top goes down
 	    while (i <= j) {
 	    	// checks if element is on the left relative to pivot
-	        while (h[i].latitude < pivot)
+	        while (h[i].latitude < pivot) {
 	            i++;
+	            comparisons++;
+	        }
+	        comparisons++;    
+	        
 	        // checks if element is on the right relative to pivot    
-	        while (h[j].latitude > pivot)
-	            j--;
-	        // swaps left item with right item    
+	        while (h[j].latitude > pivot) {
+	        	j--;
+	        	comparisons++;
+	        }
+	        comparisons++;
+	        
+	        // swaps left item with right item when both are out of place, and increments trackers   
 	        if (i <= j) {
 	            temp = h[i];
 	            h[i] = h[j];
 	            h[j] = temp;
 	            i++;
 	            j--;
+	            moves += 2;
 	        }
 	    }
 	}
@@ -113,11 +147,18 @@ void quickSort(vector<Hydropower> &h, int left, int right) {
 	      // While lower counter is less than upper counter - i starts at bottom and goes up, j starts at top goes down
 	    while (i <= j) {
 	    	// checks if element is on the left relative to pivot
-	        while (h[i].county < pivot)
+	        while (h[i].county < pivot){
 	            i++;
+	            comparisons++;
+	        }
+	        comparisons++;
+	        
 	        // checks if element is on the right relative to pivot    
-	        while (h[j].county > pivot)
+	        while (h[j].county > pivot)	{
 	            j--;
+	            comparisons++;
+	        }
+	        comparisons++;
 	            
 	        if (i <= j) {
 	            temp = h[i];
@@ -125,9 +166,41 @@ void quickSort(vector<Hydropower> &h, int left, int right) {
 	            h[j] = temp;
 	            i++;
 	            j--;
+	            moves += 2;
 	        }
 	    }			
 	}
+	
+	// Sort by Name:
+	if (toSort == 'n' || toSort == 'N') {
+    	string pivot = h[(left + right) / 2].name;
+ 
+	      // While lower counter is less than upper counter - i starts at bottom and goes up, j starts at top goes down
+	    while (i <= j) {
+	    	// checks if element is on the left relative to pivot
+	        while (h[i].name < pivot){
+	            i++;
+	            comparisons++;
+	        }
+	        comparisons++;
+	        
+	        // checks if element is on the right relative to pivot    
+	        while (h[j].name > pivot)	{
+	            j--;
+	            comparisons++;
+	        }
+	        comparisons++;
+	            
+	        if (i <= j) {
+	            temp = h[i];
+	            h[i] = h[j];
+	            h[j] = temp;
+	            i++;
+	            j--;
+	            moves += 2;
+	        }
+	    }			
+	}	
 		
       // Recusively solve smaller subarrays within original array (no new memory is allocated)
       if (left < j)
@@ -148,6 +221,7 @@ void merge(vector<Hydropower> &h, int left, int right, int mid){
     // Sorting county:
     if (toSort == 'c' || toSort == 'C') {
 	    while (i <= mid && j <= right) {	// two subarrays, left to mid and mid +1 to right
+			comparisons++;		
 	        if (h[i].county < h[j].county) 	// compares selected value
 	            temp[k++] = h[i++];			// comparing sorted lists(from earlier in the year)
 	         else 
@@ -155,14 +229,19 @@ void merge(vector<Hydropower> &h, int left, int right, int mid){
 		}
 		
 		// Copy remaining elements from subarray 1
-	    while (i <= mid) 
+	    while (i <= mid) {
 	        temp[k++] = h[i++];
+	        moves++;
+		}
 	    // Copy remaining elements from subarray 2  
-	    while (j <= right) 
+	    while (j <= right) {
 	        temp[k++] = h[j++];
+	        moves++;
+	    }
 	    // Edit new hydropower 
 	    for (i = left; i < k; i++) {
 	        h[i] = temp[i];
+	        moves++;
 
 		}
 	}
@@ -170,23 +249,51 @@ void merge(vector<Hydropower> &h, int left, int right, int mid){
 	// Sorting latitude:
 	if (toSort == 'l' || toSort == 'L') {
 	    while (i <= mid && j <= right) {
+	    	comparisons++;
 	        if (h[i].latitude < h[j].latitude) 
 	            temp[k++] = h[i++];
 	         else 
 	            temp[k++] = h[j++];      
 	    }
 	    
-	    while (i <= mid) 
+	    while (i <= mid) {
 	        temp[k++] = h[i++];
-	    
-	    while (j <= right) 
+	    	moves++;
+	    }
+	    while (j <= right) {
 	        temp[k++] = h[j++];
-	    
+	    	moves++;
+	    }
 	    for (i = left; i < k; i++){
 	        h[i] = temp[i];
-	        
+	        moves++;
 		}
-	}	
+	}
+	
+	// Sorting name:
+	if (toSort == 'n' || toSort == 'N') {
+	    while (i <= mid && j <= right) {
+	    	comparisons++;
+	        if (h[i].name < h[j].name) 
+	            temp[k++] = h[i++];
+	         else 
+	            temp[k++] = h[j++];      
+	    }
+	    
+	    while (i <= mid) {
+	        temp[k++] = h[i++];
+	    	moves++;
+	    }
+	    
+	    while (j <= right) {
+	        temp[k++] = h[j++];
+	    	moves++;
+	    }
+	    for (i = left; i < k; i++){
+	        h[i] = temp[i];
+	        moves++;
+		}
+	}		
 			
 }	
 		
@@ -209,20 +316,20 @@ void mergeSort(vector<Hydropower> &h, int left, int right){
 void insertionSort(vector<Hydropower> &h){
 	
 	int i, j;
-	int moves = 0;
 	
 	// Sort by latitude:
 	if (toSort == 'l' || toSort == 'L') {
-		for (i = 1; i < h.size(); i++){
+		for (i = 1; i < h.size(); i++) {
 			// Current element:
 			float current = h[i].latitude;
 			Hydropower cur_location = h[i];
 			
 			// Find where j should be located in the first i-1 elements:
-			for (j = 0; j < i; j++)
+			for (j = 0; j < i; j++){
+				comparisons++;
 				if (h[j].latitude >= current)
-					break;
-			
+					break;	
+			}
 			
 			// Shift elements down 
 			for (int k = i - 1; k >= j; k--)
@@ -236,38 +343,71 @@ void insertionSort(vector<Hydropower> &h){
 	
 	// Sort by county:
 	if (toSort == 'c' || toSort == 'C') {
-		for (i = 1; i < h.size(); i++){
+		for (i = 1; i < h.size(); i++) {
 			// Current element:
 			string current = h[i].county;
 			Hydropower cur_location = h[i];
 			
 			// Find where j should be located in the first i-1 elements:
-			for (j = 0; j < i; j++)
+			for (j = 0; j < i; j++){
+				comparisons++;
 				if (h[j].county >= current)
 					break;
-			
+			}
 			
 			// Shift elements down 
-			for (int k = i - 1; k >= j; k--)
+			for (int k = i - 1; k >= j; k--){
 				h[k + 1] = h[k];
+				moves++;
+			}
 			
 			h[j] = cur_location;
 			moves++;
+			
 		}
-		
 	}
 	
-	cout << "Insertion Sorted in " << moves << " moves" << endl;		
+	// Sort by Name:
+	if (toSort == 'n'|| toSort == 'N') {
+		for (i = 1; i < h.size(); i++) {
+			// Current element:
+			string current = h[i].name;
+			Hydropower cur_location = h[i];
+			
+			// Find where j should be located in the first i-1 elements:
+			for (j = 0; j < i; j++){
+				comparisons++;
+				if (h[j].name >= current)
+					break;
+			}
+			
+			// Shift elements down 
+			for (int k = i - 1; k >= j; k--){
+				h[k + 1] = h[k];
+				moves++;
+			}
+			
+			h[j] = cur_location;
+			moves++;
+			
+		}		
+			
+	}	
+		
+	
+	
 			
 }
 /************************************** MAIN PROGRAM ***************************************************************************************************************************/
 
 int main(){
 	
+	system("Mode 90, 25");
+	
 	// Read in CSV
 	vector<Hydropower> hydropower;
 	Hydropower h;
-	ifstream fin("hydropower.csv");
+	ifstream fin("data.csv");
 	if (!fin){
 		cerr << "File not found; Check directories!" << endl;
 		return -1;
@@ -278,12 +418,13 @@ int main(){
 	char ch;
 	getline(fin, value);
 	
-	int count = 0;
+	// For Output and method selection
 	char method;
 	bool isValid = false;
 	
+	// Reads into vector<Hydropower>
 	while (fin.good()) {
-		count++;
+
 		readNext(fin, h.county);
 		readNext(fin, h.cElevation);
 		readNext(fin, h.cLength);
@@ -303,7 +444,7 @@ int main(){
 	}
 	
 	// Takes in input and decides which method to use
-	cout << "Sort by: County(C) or Latitude(L): ";
+	cout << "Sort by: County(c) or Latitude(l) or Name(n): ";
 	cin >> toSort;
 	
 	//Category:
@@ -318,11 +459,17 @@ int main(){
 			isValid = true;
 			cout << "Sort by Latitude:" << endl;
 			break;
+		case 'n':
+		case 'N':
+			isValid = true;
+			cout << "Sort by Name:" << endl;
+			break;	
 		default:
 			cout << "Invalid Input";
 			isValid = false;	
 	}
 	
+		
 	// Continues onto Sort method:
 	if (isValid) {
 		cout << "Method: Quicksort(Q), Mergesort(M), or Insertion(I): ";
@@ -345,17 +492,31 @@ int main(){
 				isValid = false;		
 		}
 	}
+
+	
 		
 	
-
+	//Output
 	if (isValid) {
-		cout << "County " << setw(10) << "| Latitude" << endl;
-		for (int n = 0; n < hydropower.size(); n ++)	
+		for (int n = 0; n < hydropower.size(); n++)	
 			printLine(hydropower[n]);
-
+		// Results of comparisons and moves	
+		switch(method){
+			case 'Q':
+			case 'q':
+				cout << endl << "Quick sorted in " << moves << " moves " << "and " << comparisons << " comparisons" << endl;  
+				break;
+			case 'M':
+			case 'm':
+				cout << endl << "Merge sorted in " << moves << " moves " << "and " << comparisons << " comparisons" << endl;
+				break;	
+			case 'I':
+			case 'i':
+				cout << endl << "Insertion sorted in " << moves << " moves " << "and " << comparisons << " comparisons" << endl;
+				break;	
+		}		
+		
 	}
 	 fin.close();
 	
 }
-
-
