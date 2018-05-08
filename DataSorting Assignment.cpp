@@ -1,22 +1,22 @@
-/*****************************************************************************
- *	Name:   David Zhu                                                        *
- *	Course: ICS4U                                                            *  
- *	Date: May 15th 2017  		                                             * 
- *	                                                                         * 
- *	Purpose: Sort Data using various sort algorithms						 *
- *	                                                                         *
- *	Usage: https://think.cs.vt.edu/corgis/csv/hospitals/hospitals.html		 *
+/******************************************************************************************************
+ *	Name:   David Zhu                                                        
+ *	Course: ICS4U                                                             
+ *	Date: May 15th 2017  		                                             
+ *	                                                                         
+ *	Purpose: Sort Data using various sort algorithms						 
+ *	                                                                         
+ *	Usage: https://think.cs.vt.edu/corgis/csv/hospitals/hospitals.html		 
  *	       														    		 *    
- *	                                                                         *
- *	Revision History:  added partition and quickSort with numbers			 *
- *						adding user interface for sort method and category	 *
- *						 added insertion and merge sort						 *  
- *	                                                                         *
- *	Known Issues: Certain names in the file contain a comma in 1 header		 *
- *					i.e (Houston, TX is considered 2 seperate objects,		 *
- *					  but are actually 1)							         *
- *	                                                                         *  
- *****************************************************************************/
+ *	                                                                         
+ *	Revision History:  added partition and quickSort with numbers			 
+ *						adding user interface for sort method and category	 
+ *						 added insertion and merge sort						   
+ *	                                                                         
+ *	Known Issues: Certain names in the file contain a comma in 1 header		 
+ *					i.e (Houston, TX is considered 2 seperate objects,		 
+ *					  but are actually 1)							         
+ *	                                                                           
+ ******************************************************************************************************/
  
 #include <iomanip>
 #include <iostream>
